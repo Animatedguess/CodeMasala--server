@@ -2,9 +2,10 @@
   "name": "codemasala--server",
   "version": "1.0.0",
   "description": "A Node.js + Express server that integrates Judge0 API to execute and evaluate code submissions in real-time for a LeetCode clone platform. 🚀",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon src/index.js"
   },
   "keywords": [
     "javascript",
@@ -17,5 +18,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
   }
 }
