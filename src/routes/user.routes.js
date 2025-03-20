@@ -1,8 +1,10 @@
 import { Router } from "express";
-import { registerUser } from "../controllers/user.controller.js";
+import { codeRunner } from "../controllers/user.controller.js";
+import { requireAuthMiddleware } from "../middlewares/clerkAuthMiddleware.js";
 
 const router = Router();
 
-router.route("/register").post(registerUser);
+router.route("/run").get(codeRunner);
+// router.route("/pro").get(requireAuthMiddleware, detailUser);
 
 export default router;
