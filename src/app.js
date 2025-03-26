@@ -17,10 +17,10 @@ app.use(express.static('public'));
 app.use(cookieParser());
 
 //routes import
-import userRouter from './routes/user.routes.js';
+import submissionRouter from './routes/submission.routes.js';
 
 
 // routes declaration
-app.use("/users", userRouter);
+app.use("/submission", submissionRouter);
 
 export { app };

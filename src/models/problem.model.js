@@ -33,13 +33,15 @@ const problemSchema = new Schema(
         tags: {
             type: [String], // Example: ["array", "hashmap"]
         },
-        testCases: [testCaseSchema], // Array of test cases
+        testCases: [
+            {
+                input: { type: String, required: true },
+                expectedOutput: { type: String, required: true }, // Ensure this field is required
+            },
+            { _id: false }
+        ], // Array of test cases
         constraints: {
             type: String, // Example: "1 ≤ nums.length ≤ 10^4"
-        },
-        createdBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User", // Refers to the user who created the problem
         },
         createdAt: {
             type: Date,
