@@ -106,4 +106,43 @@ const uploadProblem = async (req, res) => {
     }
 };
 
-export { codeRunner, uploadProblem };
+const deleteProblem = async (req, res) => {
+    try {
+        
+    } catch (error) {
+        res.status(500).json(new ApiResponse(500, error.statusCode || 500, error.message || "Internal Server Error"));
+    }
+};
+
+const getAllProblems = async (req, res) => {
+    try {
+        
+    } catch (error) {
+        res.status(500).json(new ApiResponse(500, error.statusCode || 500, error.message || "Internal Server Error"));
+    }
+};
+
+const filterAllProblems = async (req, res) => {
+    try {
+        
+    } catch (error) {
+        res.status(500).json(new ApiResponse(500, error.statusCode || 500, error.message || "Internal Server Error"));
+    }
+};
+
+const getProblem = async (req, res) => {
+    try {
+        
+    } catch (error) {
+        res.status(500).json(new ApiResponse(500, error.statusCode || 500, error.message || "Internal Server Error"));
+    }
+}
+
+export {
+    codeRunner,
+    uploadProblem,
+    deleteProblem,
+    getAllProblems,
+    filterAllProblems,
+    getProblem
+};

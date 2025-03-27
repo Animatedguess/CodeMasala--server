@@ -37,6 +37,9 @@ const userSchema = new Schema(
         },
         name: {
             type: String,
+            required: true,
+            trim: true,
+            lowercase: true,
         },
         avatar: {
             type: String, // Clerk provides user profile images
