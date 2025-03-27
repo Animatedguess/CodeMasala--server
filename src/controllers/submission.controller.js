@@ -1,4 +1,3 @@
-import { Problem } from "../models/problem.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
@@ -62,87 +61,6 @@ const codeRunner = async (req, res) => {
     }
 };
 
-
-// problem statement
-const uploadProblem = async (req, res) => {
-    try {
-        const { title, description, difficulty, tags, testCases, constraints } = req.body;
-
-        if(!title || !description || !difficulty || !tags || !testCases || !constraints){
-            throw new ApiError(400, "All fields are required");
-        }
-
-        // validate problem statement
-        const exitProblemStatement = await Problem.findOne({
-            $or: [
-                {title},
-                {description}
-            ]
-        });
-
-        if(exitProblemStatement){
-            throw new ApiError(400, "Problem statement already exists");
-        }
-
-        const newDifficulty = difficulty.toLowerCase();
-
-        // create problem statement
-        const problem = await Problem.create({
-            title,
-            description,
-            difficulty: newDifficulty,
-            tags,
-            testCases,
-            constraints
-        });
-
-        if(!problem){
-            throw new ApiError(500, "Something went wrong");
-        }
-
-        res.status(201).json(new ApiResponse(201, "Problem statement created successfully", problem));
-    } catch (error) {
-        console.log(error.statusCode || 500, error.message || "Internal Server Error");
-    }
-};
-
-const deleteProblem = async (req, res) => {
-    try {
-        
-    } catch (error) {
-        res.status(500).json(new ApiResponse(500, error.statusCode || 500, error.message || "Internal Server Error"));
-    }
-};
-
-const getAllProblems = async (req, res) => {
-    try {
-        
-    } catch (error) {
-        res.status(500).json(new ApiResponse(500, error.statusCode || 500, error.message || "Internal Server Error"));
-    }
-};
-
-const filterAllProblems = async (req, res) => {
-    try {
-        
-    } catch (error) {
-        res.status(500).json(new ApiResponse(500, error.statusCode || 500, error.message || "Internal Server Error"));
-    }
-};
-
-const getProblem = async (req, res) => {
-    try {
-        
-    } catch (error) {
-        res.status(500).json(new ApiResponse(500, error.statusCode || 500, error.message || "Internal Server Error"));
-    }
-}
-
 export {
-    codeRunner,
-    uploadProblem,
-    deleteProblem,
-    getAllProblems,
-    filterAllProblems,
-    getProblem
+    codeRunner
 };

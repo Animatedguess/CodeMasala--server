@@ -53,7 +53,19 @@ const deleteSolution = async (req, res) => {
 
 const getSolution = async (req, res) => {
     try {
-        
+        const {title} = req.body;
+
+        if(!title){
+            return res.status(400).json(new ApiResponse(400, "Title is required"));
+        }
+
+        const solution = await Solution.findOne({title});
+
+        if(!solution){
+            return res.status(404).json(new ApiResponse(404, "Solution not found"));
+        }
+
+        return res.status(200).json(new ApiResponse(200, "Solution found", solution));
     } catch (error) {
         res.status(500).json(new ApiResponse(500, error.statusCode || 500, error.message || "Internal Server Error"));
     }
@@ -69,7 +81,25 @@ const getAllSolutions = async (req, res) => {
 
 const filterAllSolutions = async (req, res) => {
     try {
-        
+        const {title} = req.body;
+
+        if(!title){
+            return res.status(400).json(new ApiResponse(400, "Title is required"));
+        }
+
+        const problem = await Problem.findOne({title});
+
+        if(!problem){
+            return res.status(400).json(new ApiResponse(400, "Problem not found"));
+        }
+
+        const solutions = await Solution.find({problemId: problem._id});
+
+        if(!solutions){
+            return res.status(404).json(new ApiResponse(404, "No solution found"));
+        }
+
+        res.status(200).json(new ApiResponse(200, "All solutions", solutions));
     } catch (error) {
         res.status(500).json(new ApiResponse(500, error.statusCode || 500, error.message || "Internal Server Error"));
     }

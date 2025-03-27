@@ -17,14 +17,16 @@ app.use(express.static('public'));
 app.use(cookieParser());
 
 //routes import
-import submissionRouter from './routes/submission.routes.js';
+import problemRouter from './routes/problem.routes.js';
 import solutionRouter from './routes/solution.routes.js';
 import userRouter from './routes/user.routes.js';
+import submissionRouter from './routes/submission.routes.js';
 
 
 // routes declaration
-app.use("/submission", submissionRouter);
+app.use("/problem", problemRouter);
 app.use("/solution", solutionRouter);
 app.use("/user", userRouter);
+app.use("/submission", submissionRouter);
 
 export { app };
