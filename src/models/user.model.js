@@ -29,15 +29,25 @@ const userSchema = new Schema(
             required: true,
             unique: true, // Clerk's unique user ID
         },
+        username: {
+            type: String,
+            required: true,
+            unique: true,
+            lowercase: true
+        },
         email: {
             type: String,
             required: true,
             unique: true,
             lowercase: true,
         },
-        name: {
+        firstName: {
             type: String,
-            required: true,
+            trim: true,
+            lowercase: true,
+        },
+        lastName:{
+            type: String,
             trim: true,
             lowercase: true,
         },
@@ -52,7 +62,7 @@ const userSchema = new Schema(
         savedCodes: [savedCodeSchema],
         judge0ApiKey: {
             type: String,
-            required: true, // Judge0 API key for executing code
+            default: "NONE",
             unique: true, // Ensures each user has a unique key
         },
         createdAt: {

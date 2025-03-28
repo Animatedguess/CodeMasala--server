@@ -1,27 +1,34 @@
-import { requireAuth } from "@clerk/express";
+import clerkClient from "@clerk/clerk-sdk-node";
+import { ApiError } from "../utils/ApiError.js";
+import { User } from "../models/user.model.js";
 
-// Middleware to check if user is authenticated
-const requireAuthMiddleware = requireAuth();
+// Initialize Clerk
+// const clerk = new Clerk({ secretKey: process.env.CLERK_SECRET_KEY });
 
-// Middleware to check if user has a specific role (e.g., "admin")
-const requireRole = (role) => {
-  return async (req, res, next) => {
-    try {
-      const { sessionClaims } = req.auth;
-      if (!sessionClaims) return res.status(401).json({ error: "Unauthorized" });
-
-      // Extract role from Clerk's `sessionClaims`
-      const userRole = sessionClaims.publicMetadata?.role;
-
-      if (!userRole || userRole !== role) {
-        return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
-      }
-
-      next(); // User has the required role, proceed
-    } catch (error) {
-      res.status(500).json({ error: "Internal Server Error" });
+const requireAuthMiddleware = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Unauthorized: Missing token" });
     }
-  };
+
+    const token = authHeader.split(" ")[1];
+
+    // Verify token with Clerk
+    const payload = await clerkClient.verifyToken(token);
+
+    if (!payload || !payload.sub) {
+      return res.status(401).json(new ApiError(401, "Unauthorized", error.message));
+    }
+
+    // Attach user details to req.user
+    req.user = await clerkClient.users.getUser(payload.sub);
+
+    next();
+  } catch (error) {
+    console.error("Token verification error:", error);
+    return res.status(401).json(new ApiError(401, "Unauthorized", error.message));
+  }
 };
 
-export { requireAuthMiddleware, requireRole };
+export { requireAuthMiddleware };

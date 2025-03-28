@@ -7,14 +7,14 @@ const JUDGE0_API_HEADERS = {
     "Content-Type": "application/json"
 };
 
-const submitCode = async (code) => {
+const submitCode = async (code, language_id) => {
     // Encode source code in Base64
     const encodedCode = Buffer.from(code).toString("base64");
 
     const response = await fetch(`${process.env.JUDGE0_API_URL}?base64_encoded=true&wait=false&fields=*`, {
         method: "POST",
         headers: JUDGE0_API_HEADERS,
-        body: JSON.stringify({ language_id: 93, source_code: encodedCode })
+        body: JSON.stringify({ language_id, source_code: encodedCode })
     });
 
     if (!response.ok) {
@@ -42,13 +42,13 @@ const fetchResult = async (token) => {
 
 const codeRunner = async (req, res) => {
     try {
-        const { code } = req.body;
+        const { code, language_id } = req.body;
         if (!code) {
             throw new ApiError(400, "Code is required");
         }
 
         // Submit code to Judge0 API
-        const submission = await submitCode(code);
+        const submission = await submitCode(code, language_id);
 
         // Fetch execution result
         const result = await fetchResult(submission.token);

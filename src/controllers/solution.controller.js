@@ -3,15 +3,19 @@ import { Solution } from "../models/solution.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
+//note:- 
+//1. Name of the Solution and Problem may or may not be same
+
 const sumbitSolution = async (req, res) => {
     try {
-        const { title, tags, markdownContent } = req.body;
+        const { title, tags, problemName, markdownContent } = req.body;
 
-        if(title === undefined || tags === undefined || markdownContent === undefined) {
+        if(title === undefined || problemName === undefined || tags === undefined || markdownContent === undefined) {
             res.status(400).json(new ApiResponse(400, "All fields are required"));
         }
 
-        const problemId = await Problem.findOne({title});
+        const problem = await Problem.findOne({title: problemName});
+        const problemId = problem._id;
 
         if(!problemId){
             res.status(400).json(new ApiResponse(400, "Problem not found"));
@@ -51,6 +55,7 @@ const deleteSolution = async (req, res) => {
     }
 };
 
+// Get a solution by title
 const getSolution = async (req, res) => {
     try {
         const {title} = req.body;
@@ -71,6 +76,7 @@ const getSolution = async (req, res) => {
     }
 };
 
+// Get all solutions of user
 const getAllSolutions = async (req, res) => {
     try {
         
@@ -79,7 +85,8 @@ const getAllSolutions = async (req, res) => {
     }
 };
 
-const filterAllSolutions = async (req, res) => {
+// Get all solutions of a problem
+const filterAllSolutionsByName = async (req, res) => {
     try {
         const {title} = req.body;
 
@@ -110,5 +117,5 @@ export {
     deleteSolution,
     getSolution,
     getAllSolutions,
-    filterAllSolutions
+    filterAllSolutionsByName
 };

@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { requireAuthMiddleware, requireRole } from "./middlewares/clerkAuthMiddleware.js";
+import { requireAuthMiddleware } from "./middlewares/clerkAuthMiddleware.js";
 
 const app = express();
 

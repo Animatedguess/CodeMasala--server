@@ -4,6 +4,6 @@ import { codeRunner } from '../controllers/submission.controller.js';
 
 const router = express.Router();
 
-router.route("/run").post(codeRunner);
+router.route("/run").post(requireAuthMiddleware, codeRunner);
 
 export default router;
