@@ -8,6 +8,12 @@ dotenv.config({
 
 connectDB();
 
-app.listen(process.env.PORT || 8000 , () => {
-    console.log("server is running on port", process.env.PORT);
+app.get('/', (req, res) => {
+  res.send('✅ Server is up and running!');
+});
+
+const port = process.env.PORT || 8000;
+
+app.listen(port || 8000 , () => {
+    console.log(`Server is running on http://localhost:${port}`);
 });

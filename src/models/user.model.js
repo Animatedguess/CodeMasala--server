@@ -1,78 +1,140 @@
 import mongoose, { Schema } from "mongoose";
 
-const savedCodeSchema = new Schema(
-    {
-        language: {
-            type: String,
-            required: true, // Programming language (e.g., "python", "javascript")
-        },
-        code: {
-            type: String,
-            required: true, // User's code submission
-        },
-        problemId: {
-            type: String,
-            required: true, // The problem ID for which the code is saved
-        },
-        createdAt: {
-            type: Date,
-            default: Date.now, // Timestamp for when the code was saved
-        },
-    },
-    { _id: false } // Prevent Mongoose from auto-generating IDs for each code object
-);
+// -----------------------------
+// Problem Progress Schema
+// -----------------------------
+const problemProgressSchema = new Schema({
+  owner: {
+    type: Schema.Types.ObjectId,
+    ref: 'User', // reference the model name
+    required: true,
+  },
+  problemId: {
+    type: Schema.Types.ObjectId,
+    ref: "Problem",
+    required: true,
+  },
+  language_id: {
+    type: Number,
+    required: true,
+  },
+  code: {
+    type: String,
+    required: true,
+  },
+  submittedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
+// -----------------------------
+// Location Schema
+// -----------------------------
+const locationSchema = new Schema({
+  country: {
+    type: String,
+    trim: true,
+  },
+  state: {
+    type: String,
+    trim: true,
+  },
+  district: {
+    type: String,
+    trim: true,
+  },
+  owner: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+});
+
+// -----------------------------
+// User Schema
+// -----------------------------
 const userSchema = new Schema(
-    {
-        clerkId: {
-            type: String,
-            required: true,
-            unique: true, // Clerk's unique user ID
-        },
-        username: {
-            type: String,
-            required: true,
-            unique: true,
-            lowercase: true
-        },
-        email: {
-            type: String,
-            required: true,
-            unique: true,
-            lowercase: true,
-        },
-        firstName: {
-            type: String,
-            trim: true,
-            lowercase: true,
-        },
-        lastName:{
-            type: String,
-            trim: true,
-            lowercase: true,
-        },
-        avatar: {
-            type: String, // Clerk provides user profile images
-        },
-        role: {
-            type: String,
-            enum: ["user", "admin"],
-            default: "user",
-        },
-        savedCodes: [savedCodeSchema],
-        judge0ApiKey: {
-            type: String,
-            default: "NONE",
-            unique: true, // Ensures each user has a unique key
-        },
-        createdAt: {
-            type: Date,
-            default: Date.now,
-        }
+  {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
     },
-    {
-        timestamps: true,
-    }
+    password: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    firstName: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
+    lastName: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
+    avatar: {
+      type: String,
+      trim: true,
+    },
+    savedCodes: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'ProblemProgress',
+      },
+    ],
+    judge0ApiKey: {
+      type: String,
+      default: "NONE",
+    },
+    gender: {
+      type: String,
+      enum: ["M", "F", "Other"],
+    },
+    location: {
+      type: Schema.Types.ObjectId,
+      ref: "Location",
+    },
+    birthday: {
+      type: String,
+    },
+    summary: {
+      type: String,
+      trim: true,
+    },
+    website: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    skillset: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
 );
 
+// -----------------------------
+// Model Exports
+// -----------------------------
 export const User = mongoose.model("User", userSchema);
+export const ProblemProgress = mongoose.model("ProblemProgress", problemProgressSchema);
+export const Location = mongoose.model("Location", locationSchema);
