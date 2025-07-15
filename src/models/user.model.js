@@ -31,28 +31,6 @@ const problemProgressSchema = new Schema({
   },
 });
 
-// -----------------------------
-// Location Schema
-// -----------------------------
-const locationSchema = new Schema({
-  country: {
-    type: String,
-    trim: true,
-  },
-  state: {
-    type: String,
-    trim: true,
-  },
-  district: {
-    type: String,
-    trim: true,
-  },
-  owner: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-});
 
 // -----------------------------
 // User Schema
@@ -68,8 +46,7 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      required: true,
-      unique: true
+      required: true
     },
     email: {
       type: String,
@@ -78,12 +55,7 @@ const userSchema = new Schema(
       lowercase: true,
       trim: true,
     },
-    firstName: {
-      type: String,
-      trim: true,
-      lowercase: true,
-    },
-    lastName: {
+    name: {
       type: String,
       trim: true,
       lowercase: true,
@@ -109,11 +81,35 @@ const userSchema = new Schema(
       enum: ["M", "F", "Other"],
     },
     location: {
-      type: Schema.Types.ObjectId,
-      ref: "Location",
+      country: {
+        type: String,
+        trim: true,
+      },
+      state: {
+        type: String,
+        trim: true,
+      },
+      district: {
+        type: String,
+        trim: true,
+      },
     },
     birthday: {
-      type: String,
+      date: {
+        type: Number,
+        min: 1,
+        max: 31,
+      },
+      month: {
+        type: Number,
+        min: 1,
+        max: 12,
+      },
+      year: {
+        type: Number,
+        min: 1900,
+        max: new Date().getFullYear(),
+      }
     },
     summary: {
       type: String,
@@ -189,4 +185,3 @@ userSchema.methods.generateRefreshToken = function(){
 // -----------------------------
 export const User = mongoose.model("User", userSchema);
 export const ProblemProgress = mongoose.model("ProblemProgress", problemProgressSchema);
-export const Location = mongoose.model("Location", locationSchema);
