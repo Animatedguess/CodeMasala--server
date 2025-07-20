@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 import { Problem } from "../models/problem.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -45,14 +47,6 @@ const uploadProblem = async (req, res) => {
     }
 };
 
-const deleteProblem = async (req, res) => {
-    try {
-        // const {title} = req.body;
-    } catch (error) {
-        res.status(500).json(new ApiResponse(500, error.statusCode || 500, error.message || "Internal Server Error"));
-    }
-};
-
 const getAllProblems = async (req, res) => {
     try {
         
@@ -69,31 +63,174 @@ const filterAllProblems = async (req, res) => {
     }
 };
 
+// ----------------------------------------------
+// crud operations on problem model
+// ----------------------------------------------
+
+const createProblem = async (req, res) => {
+  const {
+    title,
+    description,
+    difficulty,
+    tags = [],
+    constraints = "",
+    exampleProblemTestCase = [],
+    starterCode
+  } = req.body;
+
+  if ([title, description, difficulty].some(field => typeof field !== 'string' || field.trim() === "")) {
+    return res.status(400).json(
+      new ApiError(400, "All fields are required and must be non-empty strings: title, description, difficulty")
+    );
+  }
+
+  try {
+    const existingProblem = await Problem.findOne({ title: title.trim() });
+
+    if (existingProblem) {
+      return res.status(400).json(
+        new ApiResponse(400, "A problem with this title already exists in the database")
+      );
+    }
+
+    const problem = await Problem.create({
+      title: title.trim(),
+      description: description.trim(),
+      difficulty: difficulty.trim().toLowerCase(),
+      tags,
+      constraints,
+      exampleProblemTestCase,
+      starterCode
+    });
+
+    if (!problem) {
+      return res.status(500).json(new ApiError(500, "Something went wrong while saving to the database"));
+    }
+
+    return res.status(201).json(
+      new ApiResponse(201, "Problem statement successfully created", problem)
+    );
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(new ApiError(500, error?.message));
+  }
+};
+
 const getProblem = async (req, res) => {
+    const { problem_id } = req.params;
+
+    if (!problem_id) {
+        return res.status(400).json(
+            new ApiError(400, "Problem ID is required")
+        );
+    }
+
     try {
-        const { title } = req.body;
-
-        if (!title) {
-            return res.status(400).json(new ApiResponse(400, "Title is required"));
-        }
-
-        const problem = await Problem.findOne({ title });
+        const problem = await Problem.findById(problem_id)
+            .populate("testCases")
+            .exec();
 
         if (!problem) {
-            return res.status(404).json(new ApiResponse(404, "Problem statement not found"));
+            return res.status(404).json(
+                new ApiError(404, "No problem found with the provided ID")
+            );
         }
 
-        return res.status(200).json(new ApiResponse(200, "Problem statement found", problem));
+        return res.status(200).json(
+            new ApiResponse(200, "Problem fetched successfully", problem)
+        );
     } catch (error) {
-        return res.status(500).json(new ApiResponse(500, error.message || "Internal Server Error"));
+        console.error(error);
+        return res.status(500).json(
+            new ApiError(500, error?.message || "Internal Server Error")
+        );
     }
 };
 
+const updateProblem = async (req, res) => {
+    const {
+        problem_id,
+        title,
+        description,
+        difficulty,
+        tags = [],
+        constraints = "",
+        exampleProblemTestCase = [],
+        starterCode
+    } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(problem_id)) {
+        return res.status(400).json(new ApiError(400, "Invalid problem ID"));
+    }
+
+    try {
+        const problem = await Problem.findById(problem_id);
+        if (!problem) {
+            return res.status(404).json(new ApiError(404, "Problem not found"));
+        }
+
+        const updates = {};
+        if (title) updates.title = title.trim();
+        if (description) updates.description = description.trim();
+        if (difficulty) updates.difficulty = difficulty.toLowerCase();
+        if (tags.length > 0) updates.tags = tags;
+        if (constraints) updates.constraints = constraints;
+        if (Array.isArray(exampleProblemTestCase)) updates.exampleProblemTestCase = exampleProblemTestCase;
+        if (starterCode) updates.starterCode = starterCode;
+
+        const updatedProblem = await Problem.findByIdAndUpdate(
+            problem_id,
+            updates,
+            { new: true, runValidators: true }
+        );
+
+        return res.status(200).json(
+            new ApiResponse(200, "Successfully updated problem", updatedProblem)
+        );
+    } catch (error) {
+        console.log(error?.message);
+        return res.status(500).json(new ApiError(500, error?.message));
+    }
+};
+
+const deleteProblem = async (req, res) => {
+    const { problem_id } = req.body;
+
+    if (!problem_id) {
+        return res.status(400).json(
+            new ApiError(400, "Problem ID is required")
+        );
+    }
+
+    try {
+        const problem = await Problem.findById(problem_id);
+
+        if (!problem) {
+            return res.status(404).json(
+                new ApiError(404, "No problem found with the provided ID")
+            );
+        }
+
+        await Problem.deleteOne({ _id: problem_id });
+
+        return res.status(200).json(
+            new ApiResponse(200, "Successfully deleted the problem")
+        );
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json(
+            new ApiError(500, error?.message || "Internal Server Error")
+        );
+    }
+};
 
 export {
     uploadProblem,
     deleteProblem,
     getAllProblems,
     filterAllProblems,
-    getProblem
+    getProblem,
+    createProblem,
+    updateProblem
 };
