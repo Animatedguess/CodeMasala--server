@@ -39,7 +39,6 @@ const fetchResult = async (token) => {
 
         const result = await response.json();
         if (result.status.id >= 3) {
-            console.log(result);
             return result;
         }
         await new Promise((resolve) => setTimeout(resolve, 1000));
