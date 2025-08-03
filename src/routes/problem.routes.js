@@ -9,6 +9,8 @@ router.route("/upload").post(uploadProblem);
 router.route("/all").get(getAllProblems);
 router.route("/filter").get(filterAllProblems);
 router.route("/search").get(getProblem);
+
+// crud operation on problem
 router.route("/delete").delete(deleteProblem);
 router.route("/create").post(verifyJWT, createProblem);
 router.route("/update").patch(verifyJWT, updateProblem);

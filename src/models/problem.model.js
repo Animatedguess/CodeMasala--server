@@ -1,13 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 
-const testCaseSchema = new Schema(
-  {
-    input: { type: String, required: true },
-    expectedOutput: { type: String, required: true },
-  },
-  { timestamps: true }
-);
-
+// ---------------------------
+// Problem Model
+// ---------------------------
 const problemSchema = new Schema(
   {
     title: {
@@ -33,9 +28,9 @@ const problemSchema = new Schema(
     },
     testCases: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "Test",
-      },
+        input: { type: String, required: true },
+        expectedOutput: { type: String, required: true },
+      }
     ],
     exampleProblemTestCase: [
       {
@@ -56,9 +51,10 @@ const problemSchema = new Schema(
       },
     ],
     starterCode: String,
+    functionName: String,
   },
   { timestamps: true }
 );
 
+// exporting models
 export const Problem = mongoose.model("Problem", problemSchema);
-export const Test = mongoose.model("Test", testCaseSchema);

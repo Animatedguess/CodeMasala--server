@@ -75,12 +75,32 @@ const createProblem = async (req, res) => {
     tags = [],
     constraints = "",
     exampleProblemTestCase = [],
-    starterCode
+    starterCode,
+    testcases,
+    functionName
   } = req.body;
 
   if ([title, description, difficulty].some(field => typeof field !== 'string' || field.trim() === "")) {
     return res.status(400).json(
       new ApiError(400, "All fields are required and must be non-empty strings: title, description, difficulty")
+    );
+  }
+
+  if(constraints.trim()===""){
+    return res.status(400).json(
+        new ApiError(400, "You didn't provided any constraints for problem")
+    );
+  }
+
+  if(exampleProblemTestCase.length==0){
+    return res.status(400).json(
+        new ApiError(400, "Provide at one example test case.")
+    );
+  }
+
+  if(testcases.length<=5){
+    return res.status(400).json(
+        new ApiError(400, "Problem should be have atleast more then 5 testcases")
     );
   }
 
@@ -98,9 +118,18 @@ const createProblem = async (req, res) => {
       description: description.trim(),
       difficulty: difficulty.trim().toLowerCase(),
       tags,
-      constraints,
-      exampleProblemTestCase,
-      starterCode
+      constraints: constraints.trim(),
+      exampleProblemTestCase: exampleProblemTestCase.map(tc => ({
+        input: tc.input?.trim(),
+        output: tc.output?.trim(),
+        explanation: tc.explanation?.trim() || ""
+      })),
+      testCases: testcases.map(tc => ({
+        input: tc.input?.trim(),
+        expectedOutput: tc.expectedOutput?.trim()
+      })),
+      starterCode,
+      functionName
     });
 
     if (!problem) {
