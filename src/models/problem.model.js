@@ -26,7 +26,7 @@ const problemSchema = new Schema(
       default: [],
     },
     constraints: {
-      type: String,
+      type: [String],
       required: true,
     },
 

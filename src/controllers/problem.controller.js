@@ -99,14 +99,14 @@ const createProblem = async (req, res) => {
     description,
     difficulty,
     tags = [],
-    constraints = "",
+    constraints = [],
     exampleProblemTestCase = [],
     starterCode = {},
     testCases = [],
-    supportedLanguages=[],
+    supportedLanguages = [],
     functionName = "",
   } = req.body;
-  
+
   // Basic validation
   if (
     [title, description, difficulty].some(
@@ -129,7 +129,7 @@ const createProblem = async (req, res) => {
       .json(new ApiError(400, "Tags must be an array of strings"));
   }
 
-  if (constraints.trim() === "") {
+  if (!Array.isArray(constraints)) {
     return res.status(400).json(new ApiError(400, "Constraints are required"));
   }
 
@@ -159,20 +159,13 @@ const createProblem = async (req, res) => {
   if (typeof supportedLanguages !== "object") {
     return res
       .status(400)
-      .json(
-        new ApiError(400, "supportedlanguage must be an array of objects")
-      );
+      .json(new ApiError(400, "supportedlanguage must be an array of objects"));
   }
 
   if (typeof functionName !== "string" || Array.isArray(functionName)) {
     return res
       .status(400)
-      .json(
-        new ApiError(
-          400,
-          "functionName must be an string"
-        )
-      );
+      .json(new ApiError(400, "functionName must be an string"));
   }
 
   try {
@@ -189,7 +182,7 @@ const createProblem = async (req, res) => {
       description: description.trim(),
       difficulty: difficulty.trim().toLowerCase(),
       tags,
-      constraints: constraints.trim(),
+      constraints,
       exampleProblemTestCase: exampleProblemTestCase.map((tc) => ({
         input: String(tc.input || "").trim(),
         output: String(tc.output || "").trim(),
@@ -199,11 +192,11 @@ const createProblem = async (req, res) => {
         input: Array.isArray(tc.input) ? tc.input : [tc.input],
         expectedOutput: String(tc.expectedOutput || "").trim(),
       })),
-      supportedLanguages: supportedLanguages.map((sl)=>({
+      supportedLanguages: supportedLanguages.map((sl) => ({
         name: String(sl.name || "").trim(),
-        language_id: sl.language_id
+        language_id: sl.language_id,
       })),
-      starterCode, 
+      starterCode,
       functionName: functionName.trim(),
     });
 
@@ -253,10 +246,13 @@ const updateProblem = async (req, res) => {
     title,
     description,
     difficulty,
-    tags = [],
-    constraints = "",
-    exampleProblemTestCase = [],
+    tags,
+    constraints,
+    exampleProblemTestCase,
     starterCode,
+    testCases,
+    supportedLanguages,
+    functionName,
   } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(problem_id)) {
@@ -270,14 +266,25 @@ const updateProblem = async (req, res) => {
     }
 
     const updates = {};
-    if (title) updates.title = title.trim();
-    if (description) updates.description = description.trim();
-    if (difficulty) updates.difficulty = difficulty.toLowerCase();
-    if (tags.length > 0) updates.tags = tags;
-    if (constraints) updates.constraints = constraints;
+
+    if (typeof title === "string" && title.trim()) updates.title = title.trim();
+    if (typeof description === "string" && description.trim())
+      updates.description = description.trim();
+    if (
+      typeof difficulty === "string" &&
+      ["easy", "medium", "hard"].includes(difficulty.toLowerCase())
+    )
+      updates.difficulty = difficulty.toLowerCase();
+    if (Array.isArray(tags)) updates.tags = tags;
+    if (typeof constraints === "string") updates.constraints = constraints;
     if (Array.isArray(exampleProblemTestCase))
       updates.exampleProblemTestCase = exampleProblemTestCase;
-    if (starterCode) updates.starterCode = starterCode;
+    if (Array.isArray(testCases)) updates.testCases = testCases;
+    if (Array.isArray(supportedLanguages))
+      updates.supportedLanguages = supportedLanguages;
+    if (starterCode && typeof starterCode === "object")
+      updates.starterCode = starterCode;
+    if (typeof functionName === "string") updates.functionName = functionName;
 
     const updatedProblem = await Problem.findByIdAndUpdate(
       problem_id,
@@ -291,8 +298,10 @@ const updateProblem = async (req, res) => {
         new ApiResponse(200, "Successfully updated problem", updatedProblem)
       );
   } catch (error) {
-    console.log(error?.message);
-    return res.status(500).json(new ApiError(500, error?.message));
+    console.error(error);
+    return res
+      .status(500)
+      .json(new ApiError(500, error?.message || "Server error"));
   }
 };
 
