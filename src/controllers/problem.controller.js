@@ -327,7 +327,6 @@ const deleteProblem = async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, "Successfully deleted the problem"));
   } catch (error) {
-    console.error(error);
     return res
       .status(500)
       .json(new ApiError(500, error?.message || "Internal Server Error"));

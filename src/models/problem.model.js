@@ -30,7 +30,6 @@ const problemSchema = new Schema(
       required: true,
     },
 
-    // Multiple test cases for evaluation
     testCases: [
       {
         input: {
@@ -44,7 +43,6 @@ const problemSchema = new Schema(
       },
     ],
 
-    // Example test cases for problem description
     exampleProblemTestCase: [
       {
         input: {
@@ -62,7 +60,6 @@ const problemSchema = new Schema(
       },
     ],
 
-    // Multi-language support
     starterCode: {
       type: Map, // e.g. { "python": "def add(a, b):\n    return 0", "javascript": "function add(a,b){ return 0; }" }
       of: String,
