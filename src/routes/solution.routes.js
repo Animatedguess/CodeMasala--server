@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { requireAuthMiddleware } from "../middlewares/clerkAuthMiddleware.js";
 import { deleteSolution, filterAllSolutionsByName, getAllSolutions, getSolution, sumbitSolution } from "../controllers/solution.controller.js";
 
 const router = Router();

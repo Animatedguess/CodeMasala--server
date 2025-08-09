@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { deleteProblem, filterAllProblems, getAllProblems, getProblem, uploadProblem, createProblem, updateProblem } from "../controllers/problem.controller.js";
-import { requireAuthMiddleware } from "../middlewares/clerkAuthMiddleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
