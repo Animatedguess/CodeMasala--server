@@ -100,13 +100,15 @@ const updateUser = async (req, res) => {
 
 const getUser = async (req, res) => {
     try {
-        return res.status(200).json(
-            new ApiResponse(
-                200,
-                "SuccessFully fetched data of user",
-                req.user
-            )
-        )
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    "SuccessFully fetched data of user",
+                    req.user
+                )
+            );
     } catch (error) {
         return res
             .status(500)
@@ -117,28 +119,37 @@ const getUser = async (req, res) => {
 const saveCodeProgress = async (req, res) => {
     const { problemId, language_id, code } = req.body;
 
-    if ([problemId, code].some(field => !field || typeof field !== "string" || field.trim() === "")) {
-        return res.status(400).json(
-            new ApiError(
-                400,
-                "problemId, and code are all required and must be non-empty strings"
-            )
-        );
+    if (
+        [problemId, code].some(
+            (field) =>
+                !field || typeof field !== "string" || field.trim() === ""
+        )
+    ) {
+        return res
+            .status(400)
+            .json(
+                new ApiError(
+                    400,
+                    "problemId, and code are all required and must be non-empty strings"
+                )
+            );
     }
 
-    if(language_id<=0){
-        return res.status(400).json(
-            new ApiError(
-                400,
-                "language_id is always non-zero negative number"
-            )
-        )
+    if (language_id <= 0) {
+        return res
+            .status(400)
+            .json(
+                new ApiError(
+                    400,
+                    "language_id is always non-zero negative number"
+                )
+            );
     }
 
     try {
         const existingProgress = await ProblemProgress.findOne({
             owner: req.user._id,
-            problemId
+            problemId,
         });
 
         if (existingProgress) {
@@ -146,28 +157,26 @@ const saveCodeProgress = async (req, res) => {
             existingProgress.code = code;
             await existingProgress.save();
 
-            return res.status(200).json(
-                new ApiResponse(
-                    200,
-                    "Successfully updated code progress"
-                )
-            );
+            return res
+                .status(200)
+                .json(
+                    new ApiResponse(200, "Successfully updated code progress")
+                );
         }
 
         const progress = await ProblemProgress.create({
             owner: req.user._id,
             problemId,
             language_id,
-            code
+            code,
         });
 
         if (!progress) {
-            return res.status(400).json(
-                new ApiError(
-                    400,
-                    "Something went wrong while saving code"
-                )
-            );
+            return res
+                .status(400)
+                .json(
+                    new ApiError(400, "Something went wrong while saving code")
+                );
         }
 
         await User.findByIdAndUpdate(
@@ -176,21 +185,53 @@ const saveCodeProgress = async (req, res) => {
             { new: true }
         );
 
+        return res
+            .status(200)
+            .json(new ApiResponse(200, "Successfully saved new code progress"));
+    } catch (error) {
+        return res
+            .status(500)
+            .json(
+                new ApiError(
+                    500,
+                    error?.message || "Internal Server Error",
+                    error
+                )
+            );
+    }
+};
+
+const getAllCodes = async (req, res) => {
+    try {
+        const { limit = 10, cursor } = req.query;
+        const query = { owner: req.user._id };
+
+        if (cursor) {
+            query._id = { $gt: cursor };
+        }
+
+        const results = await ProblemProgress.find(query)
+            .sort({ _id: 1 })
+            .limit(Number(limit) + 1);
+
+        const hasNext = results.length > limit;
+        const paginatedResults = hasNext ? results.slice(0, -1) : results;
+        const nextCursor = hasNext
+            ? paginatedResults[paginatedResults.length - 1]._id
+            : null;
+
         return res.status(200).json(
-            new ApiResponse(
-                200,
-                "Successfully saved new code progress"
-            )
+            new ApiResponse(200, "Fetched saved code records with pagination", {
+                items: paginatedResults,
+                nextCursor,
+                hasNext,
+            })
         );
     } catch (error) {
         return res
             .status(500)
-            .json(new ApiError(500, error?.message || "Internal Server Error", error));
+            .json(new ApiError(500, error?.message || "Internal Server Error"));
     }
 };
 
-export { 
-    updateUser,
-    getUser,
-    saveCodeProgress
-};
+export { updateUser, getUser, saveCodeProgress, getAllCodes };
