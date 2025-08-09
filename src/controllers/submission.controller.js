@@ -52,7 +52,7 @@ const fetchResult = async (token, timeoutMs = 15000) => {
   }
 };
 
-// ✅ Build test wrapper depending on language
+// Build test wrapper depending on language
 const buildTestWrapper = (languageName, functionName, testCases) => {
   return testCases
     .map((tc) => {
