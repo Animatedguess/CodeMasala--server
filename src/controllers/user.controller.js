@@ -1,6 +1,6 @@
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { User } from "../models/user.model.js";
+import { ProblemProgress, User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 // note:-
@@ -114,7 +114,83 @@ const getUser = async (req, res) => {
     }
 };
 
+const saveCodeProgress = async (req, res) => {
+    const { problemId, language_id, code } = req.body;
+
+    if ([problemId, code].some(field => !field || typeof field !== "string" || field.trim() === "")) {
+        return res.status(400).json(
+            new ApiError(
+                400,
+                "problemId, and code are all required and must be non-empty strings"
+            )
+        );
+    }
+
+    if(language_id<=0){
+        return res.status(400).json(
+            new ApiError(
+                400,
+                "language_id is always non-zero negative number"
+            )
+        )
+    }
+
+    try {
+        const existingProgress = await ProblemProgress.findOne({
+            owner: req.user._id,
+            problemId
+        });
+
+        if (existingProgress) {
+            existingProgress.language_id = language_id;
+            existingProgress.code = code;
+            await existingProgress.save();
+
+            return res.status(200).json(
+                new ApiResponse(
+                    200,
+                    "Successfully updated code progress"
+                )
+            );
+        }
+
+        const progress = await ProblemProgress.create({
+            owner: req.user._id,
+            problemId,
+            language_id,
+            code
+        });
+
+        if (!progress) {
+            return res.status(400).json(
+                new ApiError(
+                    400,
+                    "Something went wrong while saving code"
+                )
+            );
+        }
+
+        await User.findByIdAndUpdate(
+            req.user._id,
+            { $push: { savedCodes: progress._id } },
+            { new: true }
+        );
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                "Successfully saved new code progress"
+            )
+        );
+    } catch (error) {
+        return res
+            .status(500)
+            .json(new ApiError(500, error?.message || "Internal Server Error", error));
+    }
+};
+
 export { 
     updateUser,
-    getUser 
+    getUser,
+    saveCodeProgress
 };
