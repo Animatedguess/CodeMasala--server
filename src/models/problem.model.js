@@ -9,10 +9,12 @@ const problemSchema = new Schema(
       type: String,
       required: true,
       unique: true,
+      trim: true,
     },
     description: {
       type: String,
       required: true,
+      trim: true,
     },
     difficulty: {
       type: String,
@@ -25,39 +27,57 @@ const problemSchema = new Schema(
     },
     constraints: {
       type: String,
+      required: true,
     },
+
+    // Multiple test cases for evaluation
     testCases: [
       {
         input: {
-          type: [mongoose.Schema.Types.Mixed],
-          required: true
+          type: [mongoose.Schema.Types.Mixed], // allows numbers, strings, arrays
+          required: true,
         },
         expectedOutput: {
           type: String,
-          required: true
-        }
-      }
+          required: true,
+        },
+      },
     ],
+
+    // Example test cases for problem description
     exampleProblemTestCase: [
       {
         input: {
           type: String,
           required: true,
-          // Example: "2 3"
         },
         output: {
           type: String,
           required: true,
-          // Example: "5"
         },
         explanation: {
           type: String,
-          // Example: "The sum of 2 and 3 is 5."
+          default: "",
         },
       },
     ],
-    starterCode: String,
-    functionName: String,
+
+    // Multi-language support
+    starterCode: {
+      type: Map, // e.g. { "python": "def add(a, b):\n    return 0", "javascript": "function add(a,b){ return 0; }" }
+      of: String,
+      required: true,
+    },
+    functionName: {
+      type: String,
+      required: true,
+    },
+    supportedLanguages: [
+      {
+        name: { type: String, required: true }, // e.g. "Python 3"
+        language_id: { type: Number, required: true }, // Judge0 language ID
+      },
+    ],
   },
   { timestamps: true }
 );
