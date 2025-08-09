@@ -28,8 +28,14 @@ const problemSchema = new Schema(
     },
     testCases: [
       {
-        input: { type: String, required: true },
-        expectedOutput: { type: String, required: true },
+        input: {
+          type: [mongoose.Schema.Types.Mixed],
+          required: true
+        },
+        expectedOutput: {
+          type: String,
+          required: true
+        }
       }
     ],
     exampleProblemTestCase: [

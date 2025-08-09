@@ -76,7 +76,7 @@ const createProblem = async (req, res) => {
     constraints = "",
     exampleProblemTestCase = [],
     starterCode,
-    testcases,
+    testCases,
     functionName
   } = req.body;
 
@@ -98,9 +98,9 @@ const createProblem = async (req, res) => {
     );
   }
 
-  if(testcases.length<=5){
+  if(testCases.length<=2){
     return res.status(400).json(
-        new ApiError(400, "Problem should be have atleast more then 5 testcases")
+        new ApiError(400, "Problem should be have atleast more then 2 testcases")
     );
   }
 
@@ -124,8 +124,8 @@ const createProblem = async (req, res) => {
         output: tc.output?.trim(),
         explanation: tc.explanation?.trim() || ""
       })),
-      testCases: testcases.map(tc => ({
-        input: tc.input?.trim(),
+      testCases: testCases.map(tc => ({
+        input: tc.input,
         expectedOutput: tc.expectedOutput?.trim()
       })),
       starterCode,

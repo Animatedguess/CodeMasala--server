@@ -29,18 +29,27 @@ const submitCode = async (code, language_id) => {
     return response.json();
 };
 
-const fetchResult = async (token) => {
+const fetchResult = async (token, timeoutMs = 15000) => {
     const url = `${process.env.JUDGE0_API_URL}/${token}?base64_encoded=true&fields=*`;
+    const startTime = Date.now();
+
     while (true) {
+        // Check timeout
+        if (Date.now() - startTime > timeoutMs) {
+            throw new Error("Execution timeout: Judge0 did not respond in time");
+        }
+
         const response = await fetch(url, { method: "GET", headers: JUDGE0_API_HEADERS });
         if (!response.ok) {
             throw new Error("Failed to fetch execution result");
         }
 
         const result = await response.json();
-        if (result.status.id >= 3) {
+        if (result.status.id >= 3) { // Judge0 finished (Success, Compilation Error, Runtime Error, etc.)
             return result;
         }
+
+        // Wait before next poll
         await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 };
@@ -60,8 +69,9 @@ const codeRunner = async (req, res) => {
         const { testCases } = problem;
 
         // Wrap user code in test harness
-        const testWrapper = testCases.map((tc, i) => {
-            return `console.log(${problem.functionName}(${tc.input}))`;
+        const testWrapper = testCases.map(tc => {
+            const safeArgs = tc.input.map(arg => JSON.stringify(arg)).join(", ");
+            return `console.log(${problem.functionName}(${safeArgs}))`;
         }).join('\n');
 
         const finalCode = `${code}\n\n${testWrapper}`;
@@ -71,6 +81,25 @@ const codeRunner = async (req, res) => {
 
         // Get result
         const result = await fetchResult(submission.token);
+
+        // Handle compile or runtime errors immediately
+        if (result.status.id === 6) { // Compilation Error
+            return res.status(400).json(
+                new ApiError(400, "Compilation Error", {
+                    compile_output: decodeBase64(result.compile_output || "")
+                })
+            );
+        }
+
+        if (result.status.id >= 7) { // Runtime Errors (7, 8, 11, 12, etc.)
+            return res.status(400).json(
+                new ApiError(400, "Runtime Error", {
+                    stderr: decodeBase64(result.stderr || ""),
+                    status: result.status.description
+                })
+            );
+        }
+
         const output = result.stdout ? decodeBase64(result.stdout).trim().split('\n') : [];
 
         // Match output to expected
