@@ -1,9 +1,6 @@
-import clerkClient from "@clerk/clerk-sdk-node";
-import { StatusCodes } from "http-status-codes";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
-import { generateUsername } from "../utils/generateUsername.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 // note:-
@@ -91,10 +88,5 @@ const updateUser = async (req, res) => {
 };
 
 export {
-    createUser,
-    getUser,
-    updateDetails,
-    defaultCreateUser, 
-    userData,
     updateUser
 };
