@@ -372,26 +372,13 @@ const createDiscussion = async (req, res) => {
     const { problem_id } = req.params;
     const { content, type } = req.body;
 
-    if (!content || !htmlContent) {
+    if (!content) {
         return res
             .status(400)
-            .json(new ApiError(400, "Content and HTML content are required"));
+            .json(new ApiError(400, "Content is required"));
     }
 
     try {
-        const existingDiscussion = await Discussion.findOne({
-            problemId: problem_id,
-            userId: req.user._id,
-            content: content.trim(),
-            typeDiscussion: type.trim().toLowerCase(),
-        });
-
-        if (existingDiscussion) {
-            return res
-                .status(409)
-                .json(new ApiError(409, "Discussion already exists"));
-        }
-
         const discussion = await Discussion.create({
             problemId: problem_id,
             userId: req.user._id,
@@ -399,13 +386,24 @@ const createDiscussion = async (req, res) => {
             typeDiscussion: type.trim().toLowerCase(),
         });
 
+
+        // deleted sensititve data for discussion
+        const discussionObject = discussion.toObject();
+        delete discussionObject.isDelete;
+        delete discussionObject.__v;
+        delete discussionObject.userId;
+        delete discussionObject.reply;
+        delete discussionObject.dislikes;
+        delete discussionObject.likes;
+        delete discussionObject.problemId;
+
         return res
             .status(201)
             .json(
                 new ApiResponse(
                     201,
                     "Discussion created successfully",
-                    discussion
+                    discussionObject
                 )
             );
     } catch (error) {
@@ -422,44 +420,87 @@ const getAllDiscussions = async (req, res) => {
 
     try {
         const discussions = await Discussion.aggregate([
-            { $match: { problemId: problem_id } },
+            // Stage 1: Match the required documents
+            {
+                $match: {
+                    problemId: new mongoose.Types.ObjectId(problem_id),
+                    isDelete: false
+                }
+            },
+
+            // Stage 2 - Add a field to identify the current user's posts
             {
                 $addFields: {
                     isLoggedInUser: {
-                        $cond: [
-                            {
-                                $eq: ["$userId", req.user._id],
-                            },
-                            1,
-                            0,
-                        ],
-                    },
-                    likeCount: { $size: { $ifNull: ["$likes", []] } },
-                    dislikeCount: { $size: { $ifNull: ["$dislikes", []] } },
-                    likedByUser: {
-                        $in: [req.user._id, { $ifNull: ["$likes", []] }],
-                    },
-                    dislikedByUser: {
-                        $in: [req.user._id, { $ifNull: ["$dislikes", []] }],
-                    },
-                },
+                        $cond: [ { $eq: ["$userId", req.user._id] }, 1, 0 ]
+                    }
+                }
             },
+
+            // Stage 3 - Sort by the new field first, then by date
             {
                 $sort: {
-                    isLoggedInUser: -1,
-                    createdAt: -1,
-                },
+                    isLoggedInUser: -1, // Sorts 1s (user's posts) before 0s
+                    createdAt: -1      // Then, sort all posts by most recent
+                }
             },
+
+            // Stage 4 - Skip documents for previous pages
             {
-                $skip: (page - 1) * limit,
+                $skip: (page - 1) * limit
             },
+
+            // Stage 5 - Limit the results to the page size
             {
-                $limit: limit,
+                $limit: limit
             },
+
+            // Stage 6: Add the like and dislike counts
             {
-                $unset: ["likes", "dislikes"],
+                $addFields: {
+                    likeCount: { $size: { $ifNull: ["$likes", []] } },
+                    dislikeCount: { $size: { $ifNull: ["$dislikes", []] } },
+                    replyCount: { $size: { $ifNull: ["$dislikes", []] } }
+                }
             },
-        ]).populate("userId", "-_id");
+
+            // Stage 7: "Populate" the user data
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "userId",
+                    foreignField: "_id",
+                    as: "user"
+                }
+            },
+
+            // Stage 8: Deconstruct the user array into an object
+            {
+                $unwind: "$user"
+            },
+
+            // Stage 9: Reshape the userId field with the username
+            {
+                $addFields: {
+                    userId: {
+                        username: "$user.username"
+                    }
+                }
+            },
+
+            // Stage 10: Remove unwanted fields
+            {
+                $project: {
+                    likes: 0,
+                    dislikes: 0,
+                    user: 0,
+                    isLoggedInUser: 0,
+                    problemId: 0,
+                    isDelete: 0,
+                    reply: 0
+                }
+            }
+        ]);
 
         return res
             .status(200)
@@ -489,6 +530,12 @@ const deleteDiscussion = async (req, res) => {
     try {
         const discussion = await Discussion.findById(discussion_id);
 
+        if(discussion.isDelete){
+          return res
+            .status(400)
+            .json(new ApiError(400, "Discussion already deleted"));
+        }
+
         if (!discussion) {
             return res
                 .status(404)
@@ -514,7 +561,8 @@ const deleteDiscussion = async (req, res) => {
 };
 
 const updateDiscussion = async (req, res) => {
-    const { discussion_id, content, type } = req.body;
+    const { content, type } = req.body;
+    const {discussion_id} = req.params;
 
     if (!discussion_id) {
         return res
@@ -525,6 +573,12 @@ const updateDiscussion = async (req, res) => {
     try {
         const discussion = await Discussion.findById(discussion_id);
 
+        if(discussion.isDelete){
+            return res
+            .status(400)
+            .json(new ApiError(400, "Discussion already deleted"));
+        }
+
         if (!discussion) {
             return res
                 .status(404)
@@ -532,8 +586,19 @@ const updateDiscussion = async (req, res) => {
         }
 
         if (content?.trim()) discussion.content = content;
-        if (type?.trim()) discussion.type = type;
+        if (type?.trim()) discussion.typeDiscussion = type;
         await discussion.save();
+
+
+        // deleted sensititve data for discussion
+        const discussionObject = discussion.toObject();
+        delete discussionObject.isDelete;
+        delete discussionObject.__v;
+        delete discussionObject.userId;
+        delete discussionObject.reply;
+        delete discussionObject.dislikes;
+        delete discussionObject.likes;
+        delete discussionObject.problemId;
 
         return res
             .status(200)
@@ -541,7 +606,7 @@ const updateDiscussion = async (req, res) => {
                 new ApiResponse(
                     200,
                     "Discussion updated successfully",
-                    discussion
+                    discussionObject
                 )
             );
     } catch (error) {
@@ -554,6 +619,7 @@ const updateDiscussion = async (req, res) => {
 const updateLikeAndDislikeDiscussion = async (req, res) => {
     const { discussion_id } = req.params;
     const isLike = req.query.isLike === "true";
+    const userId = req.user._id;
 
     if (!discussion_id) {
         return res
@@ -571,15 +637,19 @@ const updateLikeAndDislikeDiscussion = async (req, res) => {
         }
 
         if (isLike) {
-            if (!discussion.likes.includes(req.user._id)) {
-                discussion.likes.push(req.user._id);
+            if (discussion.likes.includes(userId)) {
+                discussion.likes.pull(userId);
+            } else {
+                discussion.likes.push(userId);
+                discussion.dislikes.pull(userId);
             }
-            discussion.dislikes.pull(req.user._id);
         } else {
-            if (!discussion.dislikes.includes(req.user._id)) {
-                discussion.dislikes.push(req.user._id);
+            if (discussion.dislikes.includes(userId)) {
+                discussion.dislikes.pull(userId);
+            } else {
+                discussion.dislikes.push(userId);
+                discussion.likes.pull(userId);
             }
-            discussion.likes.pull(req.user._id);
         }
 
         await discussion.save();
@@ -590,7 +660,11 @@ const updateLikeAndDislikeDiscussion = async (req, res) => {
                 new ApiResponse(
                     200,
                     "Discussion updated successfully",
-                    discussion
+                    {
+                        likesCount: discussion.likes.length,
+                        dislikesCount: discussion.dislikes.length,
+                        userLikeStatus: discussion.likes.includes(userId) ? "liked" : discussion.dislikes.includes(userId) ? "disliked" : "none"
+                    }
                 )
             );
     } catch (error) {

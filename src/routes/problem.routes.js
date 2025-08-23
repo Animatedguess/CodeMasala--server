@@ -48,13 +48,13 @@ router.route("/:problem_id").get(verifyJWT, getProblem);
 router.route("/:problem_id/discussions").post(verifyJWT, createDiscussion);
 router.route("/:problem_id/discussions").get(verifyJWT, getAllDiscussions);
 router
-    .route("/:problem_id/discussions/:discussion_id")
+    .route("/discussions/:discussion_id")
     .delete(verifyJWT, deleteDiscussion);
 router
-    .route("/:problem_id/discussions/:discussion_id")
+    .route("/discussions/:discussion_id")
     .patch(verifyJWT, updateDiscussion);
 router
-    .route("/discussions/:discussion_id")
+    .route("/discussions/:discussion_id/feedback")
     .patch(verifyJWT, updateLikeAndDislikeDiscussion);
 router
     .route("/discussions/:discussion_id/report")

@@ -8,7 +8,7 @@ import bcrypt from "bcrypt";
 const problemProgressSchema = new Schema({
     owner: {
         type: Schema.Types.ObjectId,
-        ref: "User", // reference the model name
+        ref: "User",
         required: true,
     },
     problemId: {

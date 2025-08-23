@@ -81,19 +81,6 @@ const discussionSchema = new Schema(
         },
         likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
         dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-        reports: [
-            {
-                userId: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: "User",
-                    required: true,
-                },
-                reason: {
-                    type: String,
-                    required: true,
-                },
-            },
-        ],
         reply: [
             {
                 type: mongoose.Schema.Types.ObjectId,
@@ -182,6 +169,13 @@ const problemSchema = new Schema(
                 name: { type: String, required: true }, // e.g. "Python 3"
                 language_id: { type: Number, required: true }, // Judge0 language ID
             },
+        ],
+
+        discussions: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Discussion"
+            }
         ],
     },
     { timestamps: true }
