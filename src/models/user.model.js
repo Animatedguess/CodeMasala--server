@@ -30,6 +30,7 @@ const problemProgressSchema = new Schema({
     },
 });
 
+
 // -----------------------------
 // User Schema
 // -----------------------------
@@ -174,6 +175,7 @@ userSchema.methods.generateRefreshToken = function () {
         }
     );
 };
+
 
 // -----------------------------
 // Model Exports

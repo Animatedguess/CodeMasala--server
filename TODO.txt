@@ -1,0 +1,2 @@
+maked discussion and reply model generic
+solved issue regarding register

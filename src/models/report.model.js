@@ -19,11 +19,12 @@ const reportSchema = new mongoose.Schema(
             required: true,
         },
         reportId: {
-            type: String,
+            type: mongoose.Schema.Types.ObjectId,
             required: true,
         },
         userId: {
-            type: String,
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
             required: true,
         },
     },
