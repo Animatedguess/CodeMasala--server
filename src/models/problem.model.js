@@ -38,20 +38,7 @@ const replySchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       }
-    ],
-    reports: [
-      {
-        userId:{
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-        },
-        reason: {
-          type: String,
-          required: true,
-        },
-      }
-    ],
+    ]
 });
 
 // ---------------------------

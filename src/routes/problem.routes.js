@@ -26,6 +26,10 @@ import {
 } from "../controllers/problem.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
+
+// -------------------------------------------------------------------------
+// routes
+// -------------------------------------------------------------------------
 const router = Router();
 
 router.route("/upload").post(uploadProblem);
@@ -41,25 +45,19 @@ router.route("/create").post(verifyJWT, createProblem);
 router.route("/update").patch(verifyJWT, updateProblem);
 router.route("/:problem_id").get(verifyJWT, getProblem);
 
-
 // -----------------------
 // discussion routes
 // -----------------------
 router.route("/:problem_id/discussions").post(verifyJWT, createDiscussion);
 router.route("/:problem_id/discussions").get(verifyJWT, getAllDiscussions);
-router
-    .route("/discussions/:discussion_id")
-    .delete(verifyJWT, deleteDiscussion);
-router
-    .route("/discussions/:discussion_id")
-    .patch(verifyJWT, updateDiscussion);
+router.route("/discussions/:discussion_id").delete(verifyJWT, deleteDiscussion);
+router.route("/discussions/:discussion_id").patch(verifyJWT, updateDiscussion);
 router
     .route("/discussions/:discussion_id/feedback")
     .patch(verifyJWT, updateLikeAndDislikeDiscussion);
 router
     .route("/discussions/:discussion_id/report")
     .patch(verifyJWT, reportDiscussion);
-
 
 // -----------------------
 // reply routes
@@ -70,16 +68,13 @@ router
 router
     .route("/discussions/:discussion_id/replies")
     .get(verifyJWT, getAllReplies);
+router.route("/discussions/replies/:reply_id").delete(verifyJWT, deleteReply);
+router.route("/discussions/replies/:reply_id").patch(verifyJWT, updateReply);
 router
-    .route("/discussions/:discussion_id/replies/:reply_id")
-    .delete(verifyJWT, deleteReply);
+    .route("/discussions/replies/:reply_id/feedback")
+    .patch(verifyJWT, updateLikeAndDislikeReply);
 router
-    .route("/discussions/:discussion_id/replies/:reply_id")
-    .patch(verifyJWT, updateReply);
-router
-    .route("/discussions/:discussion_id/replies/:reply_id/report")
+    .route("/discussions/replies/:reply_id/report")
     .patch(verifyJWT, reportReply);
-router.route("/replies/:reply_id").patch(verifyJWT, updateLikeAndDislikeReply);
-
 
 export default router;
