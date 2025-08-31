@@ -21,6 +21,7 @@ import userRouter from './routes/user.routes.js';
 import submissionRouter from './routes/submission.routes.js';
 import authRouter from './routes/auth.routes.js';
 import reportRouter from './routes/report.routes.js';
+import discussionRouter from './routes/discussion.routes.js';
 
 
 // routes declaration
@@ -29,6 +30,7 @@ app.use("/problem", problemRouter);
 app.use("/solution", solutionRouter);
 app.use("/user", userRouter);
 app.use("/submission", submissionRouter);
+app.use("/model", discussionRouter);
 app.use("/report", reportRouter);
 
 export { app };

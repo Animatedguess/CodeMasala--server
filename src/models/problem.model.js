@@ -1,88 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
 // ---------------------------
-// reply model
-// ---------------------------
-const replySchema = new Schema({
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-    },
-    discussionId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Discussion",
-        required: true,
-    },
-    content: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-    isDelete: {
-        type: Boolean,
-        default: false,
-    },
-    likes: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-        },
-    ],
-    dislikes: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      }
-    ]
-});
-
-// ---------------------------
-// Discussion Model
-// ---------------------------
-const discussionSchema = new Schema(
-    {
-        problemId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Problem",
-            required: true,
-        },
-        userId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-        },
-        content: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        typeDiscussion: {
-            type: String,
-            enum: ["feedback", "ask question", "tip"],
-            default: "feedback",
-        },
-        likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-        dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-        reply: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Reply",
-            },
-        ],
-        isDelete: {
-            type: Boolean,
-            default: false,
-        },
-    },
-    { timestamps: true }
-);
-
-// ---------------------------
 // Problem Model
 // ---------------------------
 const problemSchema = new Schema(
@@ -169,6 +87,4 @@ const problemSchema = new Schema(
 );
 
 // exporting models
-export const Reply = mongoose.model("Reply", replySchema);
-export const Discussion = mongoose.model("Discussion", discussionSchema);
 export const Problem = mongoose.model("Problem", problemSchema);
