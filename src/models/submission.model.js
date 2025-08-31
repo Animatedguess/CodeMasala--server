@@ -4,12 +4,12 @@ const submissionSchema = new Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Reference to the User who submitted
+      ref: "User",
       required: true,
     },
     problemId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Problem", // Reference to the Problem
+      ref: "Problem",
       required: true,
     },
     language_id: {
@@ -19,15 +19,7 @@ const submissionSchema = new Schema(
     code: {
       type: String,
       required: true,
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
-    },
+    }
   },
   { timestamps: true }
 );

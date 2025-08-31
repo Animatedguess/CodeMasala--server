@@ -1,4 +1,5 @@
 import { Problem } from "../models/problem.model.js";
+import { Submission } from "../models/submission.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
@@ -144,6 +145,17 @@ const codeRunner = async (req, res) => {
     }));
 
     const allPassed = testResults.every((tc) => tc.passed);
+    
+    // checking and saving submission
+    if(allPassed){
+      await Submission.create({
+        userId: req.user._id,
+        problemId: problemId,
+        language_id: language_id,
+        code: code
+      });
+    }
+
     return res
       .status(200)
       .json(
