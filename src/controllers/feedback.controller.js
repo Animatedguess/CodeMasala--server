@@ -1,6 +1,6 @@
 import { Feedback } from "../models/feedback.model.js";
-import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 const createFeeback = async (req, res) => {
     const { title, content, modelId } = req.body;

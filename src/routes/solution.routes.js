@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createSolution, deleteSolution, filterAllSolutionsByName, getAllSolutions, getSolution, updateSolution } from "../controllers/solution.controller.js";
+import { createSolution, deleteSolution, filterAllSolutionsByName, getAllSolutions, getSolution, updateLike, updateSolution } from "../controllers/solution.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();

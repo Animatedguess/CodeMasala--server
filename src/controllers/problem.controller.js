@@ -371,7 +371,7 @@ const deleteProblem = async (req, res) => {
 // ----------------------------------------------
 // feedback
 // ----------------------------------------------
-updateLikeAndDislikeProblem = async (req, res) => {
+const updateLikeAndDislikeProblem = async (req, res) => {
     const { problem_id } = req.params;
     const isLike = req.query.isLike==="true";
     const userId = req.user._id;
