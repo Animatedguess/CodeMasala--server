@@ -10,22 +10,24 @@ const solutionSchema = new Schema(
         },
         problemId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Problem", // Reference to the problem
+            ref: "Problem",
             required: true,
         },
         tags: {
-            type: [String], // Array of tags like ["DP", "Graph", "Binary Search"]
+            type: [String],
             default: [],
         },
         markdownContent: {
-            type: String, // Store the solution in Markdown format
+            type: String,
             required: true,
         },
-        // author: {
-        //     type: mongoose.Schema.Types.ObjectId,
-        //     ref: "User", // Reference to the user who submitted the solution
-        //     required: true,
-        // },
+        author: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+        },
+        likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+        views: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
     },
     { timestamps: true }
 );

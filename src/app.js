@@ -22,6 +22,7 @@ import submissionRouter from './routes/submission.routes.js';
 import authRouter from './routes/auth.routes.js';
 import reportRouter from './routes/report.routes.js';
 import discussionRouter from './routes/discussion.routes.js';
+import feedbackRouter from './routes/feedback.routes.js';
 
 
 // routes declaration
@@ -32,5 +33,6 @@ app.use("/user", userRouter);
 app.use("/submission", submissionRouter);
 app.use("/model", discussionRouter);
 app.use("/report", reportRouter);
+app.use("/feedback", feedbackRouter);
 
 export { app };

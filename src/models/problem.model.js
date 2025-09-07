@@ -76,12 +76,8 @@ const problemSchema = new Schema(
             },
         ],
 
-        discussions: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Discussion"
-            }
-        ],
+        likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+        dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     },
     { timestamps: true }
 );

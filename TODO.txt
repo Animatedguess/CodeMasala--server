@@ -1,0 +1,3 @@
+1. check apis of solution, problem & feedback
+2. find a way to send time & space complexity
+3. find a way to show problem run time

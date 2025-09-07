@@ -368,6 +368,49 @@ const deleteProblem = async (req, res) => {
     }
 };
 
+// ----------------------------------------------
+// feedback
+// ----------------------------------------------
+updateLikeAndDislikeProblem = async (req, res) => {
+    const { problem_id } = req.params;
+    const isLike = req.query.isLike==="true";
+    const userId = req.user._id;
+
+    if(!problem_id){
+        return res.status(400).json(new ApiError(400, "Problem ID is required"));
+    }
+
+    try {
+        const problem = await Problem.findById(problem_id);
+
+        if(!problem){
+            return res.status(404).json(new ApiError(404, "Problem not found"));
+        }
+
+        if(isLike){
+            if(problem.likes.includes(userId)){
+                problem.likes.pull(userId);
+            }
+            else{
+                problem.likes.push(userId);
+            }
+        }
+        else{
+            if(problem.dislikes.includes(userId)){
+                problem.dislikes.pull(userId);
+            }
+            else{
+                problem.dislikes.push(userId);
+            }
+        }
+
+        await problem.save();
+        return res.status(200).json(new ApiResponse(200, "Problem liked successfully", problem));
+    }
+    catch (error) {
+        return res.status(500).json(new ApiError(500, error?.message || "Internal Server Error"));
+    }
+}
 
 // ----------------------
 // export
